@@ -1,0 +1,329 @@
+= OpenAPI Diagram
+
+["plantuml", "openapi", "svg"]
+----
+@startuml
+top to bottom direction
+
+object Reference {
+$ref: string 
+}
+
+object Schema {
+title: string
+multipleOf
+maximum
+exclusiveMaximum
+minimum
+exclusiveMinimum
+maxLength
+minLength
+pattern
+maxItems
+minItems
+uniqueItems
+maxProperties
+minProperties
+required
+enum
+
+type: string
+allOf: Schema | Reference
+oneOf: inline | Schema | Reference
+anyOf: inline | Schema | Reference
+not: inline | Schema | Reference
+items: inline | Schema | Reference
+properties: Schema | Reference
+additionalProperties: bool | Schema | Reference
+description
+format
+default
+
+nullable: bool
+dicsriminator: Discriminator
+readOnly: bool
+writeOnly: bool
+xml: XML Object
+externalDocs: ExternalDocumentation
+example: ANY
+deprecated: bool
+}
+
+map "Map<string, Schema | Reference>" as _Schemas {
+string *--> Schema
+string *--> Reference
+}
+
+object Example {
+summary: string
+description: string
+value: ANY
+externValue: string
+}
+
+map "Map<string, Example | Reference>" as _Examples {
+string *-> Example
+string *--> Reference
+}
+
+object ExternalDocumentation {
+description: string
+url: string
+}
+
+object OAuthFlow {
+authorizationUrl: string
+tokenUrl: string
+refreshUrl: string
+scopes: Map<string, string>
+}
+
+map OAuthFlows {
+implicit *-> OAuthFlow
+password *-> OAuthFlow
+clientCredentials *-> OAuthFlow
+authorizationCode *-> OAuthFlow
+}
+
+map SecurityScheme {
+type => string
+description => string
+name => string
+in => string
+scheme => string
+bearerFormat => string
+flows *---> OAuthFlows
+openIdConnectUrl => string
+}
+
+map "Map<string, SecurityScheme | Reference>" as _SecuritySchemes {
+string *-> SecurityScheme
+string *--> Reference
+}
+
+
+object SecurityRequirement {
+name[]: string
+}
+
+object Contact {
+name: string
+url: string
+email: string
+}
+
+object License {
+name: string
+url: string
+}
+
+object ServerVariable {
+enum[] : string
+default : string
+description : string
+}
+
+map "Map<string, ServerVariable>" as _Servervariables {
+string *-> ServerVariable
+}
+
+map Server {
+url => string
+description => string
+variables *--> _Servervariables 
+}
+
+map Info {
+title => string
+description => string
+termsOfService => string
+contact *--> Contact
+license *--> License
+version => string
+}
+
+map "Map<string, MediaType>" as _MediaTypes {
+; forward declaring a variable 
+}
+
+map Parameter {
+name => string
+in => string
+description => string
+required => bool
+deprecated => bool
+allowEmptyValue => bool
+style => string
+explode => bool
+allowReserved => bool
+schema *--> Schema
+schema *--> Reference
+example => ANY
+examples *--> _Examples
+content *--> _MediaTypes
+; style values are not shown
+}
+
+map "Map<string, Parameter | Reference>" as _Parameters {
+string *--> Parameter
+string *--> Reference
+}
+
+map Header { 
+see *--> Parameter
+}
+
+map "Map<string, Header | Reference>" as _Headers {
+string *--> Header
+string *--> Reference
+}
+
+map Encoding {
+contentType => string
+style => string
+explode => bool
+allowReserved => bool
+headers *--> _Headers
+}
+
+map "Map<string, Encoding>" as _Encodings {
+string *--> Encoding
+}
+
+map MediaType {
+schema *--> Schema
+schema *--> Reference
+example: ANY
+examples *--> _Examples
+encoding *--> _Encodings
+}
+
+map "Map<string, MediaType>" as _MediaTypes {
+string *--> MediaType
+}
+
+map RequestBody {
+description => string
+required => boolean
+content *---> _MediaTypes 
+}
+
+map "Map<string, RequestBody | Reference >" as _RequestBodies {
+string *--> RequestBody
+string *--> Reference
+}
+
+map Link {
+operationRef => string
+operationId => string
+parameters => Map<string, ANY | expression>
+requestBody => ANY | expression
+description => string
+server *--> Server
+}
+
+map "Map<string, Link | Reference>" as _Links {
+string *--> Link
+string *--> Reference
+}
+
+map Response {
+description => string
+headers *--> _Headers
+content *--> _MediaTypes
+links *--> _Links
+}
+
+map Responses {
+default *--> Response
+default *--> Reference
+http_code *--> Response
+http_code *--> Reference
+}
+
+map "Map<string, Response | Reference>" as _Responses {
+string *--> Response
+string *--> Reference
+}
+
+map "Map<string, Callback | Reference>" as _Callbacks {
+}
+
+map Operation {
+tags[] => string
+summary => string
+description => string
+externalDocs *---> ExternalDocumentation
+operationId => string
+parameters[|] *--> Reference
+parameters[|] *--> Parameter
+requestBody *--> RequestBody
+requestBody *--> Reference
+responses *--> Responses
+callbacks *---> _Callbacks
+deprecated => bool
+security[] *--> SecurityRequirement
+servers[] *---> Server
+}
+
+map PathItem {
+$ref => string
+summary => string
+description => string
+get *--> Operation
+put *--> Operation
+post *--> Operation
+delete *--> Operation
+options *--> Operation
+head *--> Operation
+patch *--> Operation
+trace *--> Operation
+servers[] *--> Server
+parameters[|] *--> Reference
+parameters[|] *--> Parameter
+}
+
+map Callback {
+experession *--> PathItem
+}
+
+map "Map<string, Callback | Reference>" as _Callbacks {
+string *-> Callback
+string *--> Reference
+}
+
+map Paths {
+""/"" *-> PathItem
+}
+
+map Components {
+schemas *--> _Schemas
+responses *--> _Responses
+parameters *--> _Parameters
+examples *--> _Examples
+requestBodies *--> _RequestBodies
+headers *--> _Headers
+securitySchemes *--> _SecuritySchemes
+links *--> _Links
+callbacks *--> _Callbacks
+}
+
+map Tag {
+name => string
+description => string
+externalDocs *----> ExternalDocumentation
+}
+
+map OpenAPI {
+openapi => string
+info *-> Info
+servers[] *--> Server
+paths *--> Paths
+components *--> Components
+security[] *--> SecurityRequirement
+tags[] *--> Tag
+externalDocs *---> ExternalDocumentation
+}
+
+@enduml
+----
